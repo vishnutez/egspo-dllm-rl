@@ -1,4 +1,4 @@
-name: d1
+name: epsa-dllm-rl
 channels:
   - defaults
 dependencies:
