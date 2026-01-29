@@ -1,6 +1,6 @@
-# EPSA
+# EGSPO-SA
 
-Official implementation of Entropy-guided Policy-gradient with Stepwise Advantages (EPSA) for RL fine-tuning of diffusion Large Language Models (dLLMs).
+Official implementation of Entropy-Guided Stepwise Policy Optimization with Stepwise Advantages (EGSPO-SA) for RL fine-tuning of diffusion Large Language Models (dLLMs). In this repo, we call it EPSA for short.
 
 ## Setup
 
