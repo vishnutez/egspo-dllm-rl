@@ -56,11 +56,11 @@ else
 fi
 
 if (( $(echo "$LAMBDA1 > 0.0" | bc -l) )); then
-    ALGO_NAME="epsa_lambda1_${LAMBDA1}"
+    ALGO_NAME="epsa_lambda1_${LAMBDA1}_"
 elif [ "$LOGPS_EVAL_TIME_STEPS_MODE" == "high_entropy" ]; then
-    ALGO_NAME="ep_lambda1_0.0"
+    ALGO_NAME="ep_lambda1_0.0_"
 else
-    ALGO_NAME="vanilla_grpo"
+    ALGO_NAME="vanilla_grpo_"
 fi
 
 if [ "$CORRECTNESS_STEP_REWARD_ONLY" = True ]; then

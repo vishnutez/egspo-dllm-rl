@@ -53,7 +53,7 @@ use_reentrant: false
 resume_from_checkpoint: false
 
 run_name: your_run_name
-output_dir: /checkpoints/your_run_name  # <-- Replace with desired output directory
+output_dir: /checkpoints/your_task_name/your_run_name  # <-- Replace with desired output directory
 
 # Parameters for saving checkpoints
 save_steps: 200
