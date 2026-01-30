@@ -841,7 +841,7 @@ class EPSATrainer(GRPOTrainer):
 
                 # Repeat all input columns (but "prompt" and "completion") to match the number of generations
                 keys = [key for key in inputs[0] if key not in ["prompt", "completion"]]
-                reward_kwargs = {key: [example[key] for example in inputs for _ in range(self.args.diffusion_steps+1)] for key in keys}
+                reward_kwargs = {key: [example[key] for example in inputs for _ in range(self.args.logps_eval_num_steps+1)] for key in keys}
                 output_reward_func = reward_func(
                     prompts=prompts_full,
                     completions=completions,
