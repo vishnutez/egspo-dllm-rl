@@ -2,7 +2,7 @@
 #SBATCH --job-name=<YOUR_JOB_NAME>
 #SBATCH --time=96:00:00
 #SBATCH --ntasks-per-node=2
-#SBATCH --mem=128G # 128GB
+#SBATCH --mem=128G
 #SBATCH --gres=gpu:a100:2
 #SBATCH --nodes=4
 #SBATCH --output=logs/%x_%j.out
@@ -33,15 +33,16 @@ LOGPS_EVAL_NUM_STEPS=8
 LEARNING_RATE=3e-5
 LOGPS_EVAL_MODE="unbiased"
 LOGPS_EVAL_TIME_STEPS_MODE="high_entropy"
-EPSILON=0.5
+EPSILON=0.2
+EPSILON_HIGH=0.5
 TEMPERATURE=0.9
 TERMINATE_AT_LAST_NON_EOS=False
 BETA=0.04
-LAMBDA1=0.5
-NORMALIZE_RETURNS=False
+LAMBDA1=0.5  # The weight for the stepwise advantage term: Rt = r(x0) - r(x0|t+1).
+NORMALIZE_RETURNS=True  # True: Rt = (r(x0) + lambda1 * (r(x0) - r(x0|t+1))) / (1 + lambda1) for normalization
 USE_EXACT_KL=False
 CORRECTNESS_STEP_REWARD_ONLY=False
-LOGPS_AGGREGATION_MODE="mean"
+LOGPS_AGGREGATION_MODE="sum"  # "sum": sums the logps of unmasked tokens per time step, "mean": takes the mean
 
 if [ "$TERMINATE_AT_LAST_NON_EOS" = True ]; then
     TERMINATE_AT_LAST_NON_EOS_FLAG="_terminate_eos"
@@ -56,7 +57,12 @@ else
 fi
 
 if (( $(echo "$LAMBDA1 > 0.0" | bc -l) )); then
-    ALGO_NAME="epsa_lambda1_${LAMBDA1}_"
+    if [ "$NORMALIZE_RETURNS" = True ]; then
+        NORMALIZE_RETURNS_FLAG="_normalized"
+    else
+        NORMALIZE_RETURNS_FLAG=""
+    fi
+    ALGO_NAME="epsa_lambda1_${LAMBDA1}${NORMALIZE_RETURNS_FLAG}_"
 elif [ "$LOGPS_EVAL_TIME_STEPS_MODE" == "high_entropy" ]; then
     ALGO_NAME="ep_lambda1_0.0_"
 else
@@ -69,7 +75,7 @@ else
     STEP_REWARD_ONLY_FLAG=""
 fi
 
-RUN_NAME="${ALGO_NAME}${LOGPS_EVAL_MODE}_${LOGPS_EVAL_TIME_STEPS_MODE}_${DATASET}_eps_${EPSILON}_temp_${TEMPERATURE}_ng${NUM_GENERATIONS}_bs${PER_DEVICE_TRAIN_BATCH_SIZE}_ga${GRAD_ACCUMULATION_STEPS}_le${LOGPS_EVAL_NUM_STEPS}_lr${LEARNING_RATE}_${KL_TYPE}_${BETA}${STEP_REWARD_ONLY_FLAG}_logps_aggregation_${LOGPS_AGGREGATION_MODE}"
+RUN_NAME="${ALGO_NAME}${LOGPS_EVAL_MODE}_${LOGPS_EVAL_TIME_STEPS_MODE}_${DATASET}_eps_${EPSILON}_eps_high_${EPSILON_HIGH}_temp_${TEMPERATURE}_ng${NUM_GENERATIONS}_bs${PER_DEVICE_TRAIN_BATCH_SIZE}_ga${GRAD_ACCUMULATION_STEPS}_le${LOGPS_EVAL_NUM_STEPS}_lr${LEARNING_RATE}_${KL_TYPE}_${BETA}${STEP_REWARD_ONLY_FLAG}_logps_aggregation_${LOGPS_AGGREGATION_MODE}"
 
 # epsa_train.py args (editable)
 TRAIN_SCRIPT="epsa_train.py"
@@ -87,6 +93,7 @@ TRAIN_ARGS_EXTRA="--model_path ${MODEL_PATH} \
                   --logps_eval_time_steps_mode ${LOGPS_EVAL_TIME_STEPS_MODE} \
                   --learning_rate ${LEARNING_RATE} \
                   --epsilon ${EPSILON} \
+                  --epsilon_high ${EPSILON_HIGH} \
                   --temperature ${TEMPERATURE} \
                   --terminate_at_last_non_eos ${TERMINATE_AT_LAST_NON_EOS} \
                   --beta ${BETA} \
@@ -103,14 +110,15 @@ TRAIN_ARGS_EXTRA="--model_path ${MODEL_PATH} \
 
 # Optinally load modules, e.g.: Miniconda3 and CUDA
 
-source activate <YOUR_CONDA_ENV_NAME \>
+ml Miniconda3
+ml WebProxy
+ml CUDA/12.9.0  # Load CUDA module
+source activate <YOUR_CONDA_ENV_NAME >
 
 export WANDB_API_KEY=<YOUR_WANDB_API_KEY>
 export WANDB_PROJECT=<YOUR_WANDB_PROJECT>
 export CUDA_HOME=${CUDA_HOME:-/usr/local/cuda}  # Set CUDA_HOME if not already set
 export HF_HOME=<YOUR_HF_HOME_DIR>  # remove this line if you are using the default HF_HOME
-
-mkdir -p logs "$CFGDIR"
 
 # ----------------------------
 # Cluster topology

@@ -365,9 +365,9 @@ class EPSAConfig(TrainingArguments):
     dataset: Optional[str] = field(
         default="gsm8k",
     )
-    epsilon_low: float = field(
-        default=0.5,
-        metadata={"help": "Epsilon value for lower clipping."},
+    epsilon: float = field(
+        default=0.2,
+        metadata={"help": "Epsilon value for clipping."},
     )
     epsilon_high: float = field(
         default=0.5,
