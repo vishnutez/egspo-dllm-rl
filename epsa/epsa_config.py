@@ -306,10 +306,6 @@ class EPSAConfig(TrainingArguments):
         default=1,
         metadata={"help": "Number of iterations per batch (denoted as μ in the algorithm)."},
     )
-    epsilon: float = field(
-        default=0.2,
-        metadata={"help": "Epsilon value for clipping."},
-    )
     reward_weights: Optional[list[float]] = field(
         default=None,
         metadata={
@@ -369,13 +365,13 @@ class EPSAConfig(TrainingArguments):
     dataset: Optional[str] = field(
         default="gsm8k",
     )
-    epsilon: float = field(
+    epsilon_low: float = field(
         default=0.5,
-        metadata={"help": "Epsilon value for clipping."},
+        metadata={"help": "Epsilon value for lower clipping."},
     )
     epsilon_high: float = field(
         default=0.5,
-        metadata={"help": "Epsilon value for clipping."},
+        metadata={"help": "Epsilon value for higher clipping."},
     )
     p_mask_prompt: float = field(
         default=0.3,

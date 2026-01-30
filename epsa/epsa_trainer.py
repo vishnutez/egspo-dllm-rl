@@ -123,7 +123,7 @@ class EPSATrainer(GRPOTrainer):
 
         old_per_token_logps = inputs["old_per_token_logps"][eval_time_step_idx] if self.args.logps_eval_num_steps > 1 else per_token_logps.detach()
         coef_1 = torch.exp(per_token_logps - old_per_token_logps) # [per_device_train_batch_size,]
-        coef_2 = torch.clamp(coef_1, 1 - self.epsilon, 1 + self.epsilon)
+        coef_2 = torch.clamp(coef_1, 1 - self.args.epsilon_low, 1 + self.args.epsilon_high)
         per_token_loss1 = coef_1 * advantages # [per_device_train_batch_size,]
         per_token_loss2 = coef_2 * advantages # [per_device_train_batch_size,]
         per_token_loss = -torch.min(per_token_loss1, per_token_loss2) # [per_device_train_batch_size,]
