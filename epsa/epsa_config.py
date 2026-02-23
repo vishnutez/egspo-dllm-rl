@@ -389,6 +389,10 @@ class EPSAConfig(TrainingArguments):
         default=8,
         metadata={"help": "Number of diffusion steps for the trajectory during evaluation of logps. Must be between 1 and the total number of diffusion steps."},
     )
+    num_gradient_steps: int = field(
+        default=1,
+        metadata={"help": "Number of gradient steps per generation batch."},
+    )
     pred_state: str = field(
         default="next",
         metadata={"help": "Prediction state from curr state: 'next' or 'final'."},
@@ -424,4 +428,8 @@ class EPSAConfig(TrainingArguments):
     logps_aggregation_mode: str = field(
         default="mean",
         metadata={"help": "Mode for aggregating logps per step. Must be one of 'sum' or 'mean'."},
+    )
+    standard_grpo_returns: bool = field(
+        default=False,
+        metadata={"help": "Whether to use standard GRPO returns. If False, we use stepwise advantages to compute the returns."},
     )

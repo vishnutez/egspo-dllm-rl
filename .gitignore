@@ -72,3 +72,8 @@ checkpoints/
 
 # ---- Logs ----
 logs_*/
+
+
+
+*.sbatch
+*.json

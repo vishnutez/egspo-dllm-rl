@@ -22,6 +22,7 @@ from trl.trainer.utils import (
     selective_log_softmax,
 )
 import wandb
+from collections import defaultdict
 
 if is_peft_available():
     from peft import PeftConfig, get_peft_model
@@ -554,7 +555,7 @@ class EPSATrainer(GRPOTrainer):
     ) -> dict[str, Union[torch.Tensor, Any]]:
         mode = "eval" if self.control.should_evaluate else "train"
         if mode == "train":
-            if self._step % self.args.logps_eval_num_steps == 0:
+            if self._step % (self.args.logps_eval_num_steps * self.args.num_gradient_steps) == 0:
                 inputs = self._generate_and_score_completions(inputs)
                 self._cached_inputs = inputs
             else:
@@ -769,6 +770,7 @@ class EPSATrainer(GRPOTrainer):
 
             if self.beta == 0.0:
                 ref_per_token_logps = None
+                ref_all_tokens_logps = None
             else:
                 with self.accelerator.unwrap_model(self.model).disable_adapter():
                     if self.args.logps_eval_mode == 'unbiased':
@@ -898,13 +900,27 @@ class EPSATrainer(GRPOTrainer):
 
         print(f'final_rewards_all_devices (batch_size,) = ({final_rewards_all_devices})', flush=True)
 
-        incremental_advantages = (final_rewards.unsqueeze(1) - rewards_per_step[:, :-1])  # (batch_size, logps_eval_num_steps)
-        returns_local_selected =  (final_rewards.unsqueeze(1) + self.args.lambda1 * incremental_advantages)
+        stepwise_advantages = (final_rewards.unsqueeze(1) - rewards_per_step[:, :-1])  # (batch_size, logps_eval_num_steps)
 
-        if self.args.normalize_returns:
-            print('normalizing returns by 1 + lambda1', flush=True)
-            returns_local_selected = returns_local_selected / (1 + self.args.lambda1) # (per_device_batch_size, logps_eval_num_steps)
 
+        if self.args.standard_grpo_returns:
+            returns_local_selected = final_rewards.unsqueeze(1)
+        else:
+            returns_local_selected =  (final_rewards.unsqueeze(1) + self.args.lambda1 * stepwise_advantages)
+            if self.args.normalize_returns:
+                print('normalizing returns by 1 + lambda1', flush=True)
+                returns_local_selected = returns_local_selected / (1 + self.args.lambda1) # (per_device_batch_size, logps_eval_num_steps)
+            else:
+                print('not normalizing returns', flush=True)
+
+
+        step_reward_ratios = rewards_per_step[:, :-1] / final_rewards.unsqueeze(1)
+
+        # Gather step_reward_ratios across all devices for plotting
+        step_reward_ratios_all_devices = self.accelerator.gather_for_metrics(step_reward_ratios)  # (total_batch_size, logps_eval_num_steps)
+
+        # Gather eval_time_steps across all devices for plotting
+        eval_time_steps_all_devices = self.accelerator.gather_for_metrics(eval_time_steps)  # (total_batch_size, logps_eval_num_steps)
 
         returns = gather(returns_local_selected)
 
@@ -933,6 +949,16 @@ class EPSATrainer(GRPOTrainer):
         )
         advantages_per_step = advantages_per_step[process_slice]
 
+
+        if self.args.standard_grpo_returns:
+            # Add stepwise advantages to advantages_per_step
+            advantages_per_step = advantages_per_step + self.args.lambda1 * stepwise_advantages
+            if self.args.normalize_returns:
+                print('normalizing advantages by (1 + lambda1)', flush=True)
+                advantages_per_step = advantages_per_step / (1 + self.args.lambda1) # (batch_size, logps_eval_num_steps)
+            else:
+                print('not normalizing advantages', flush=True)
+
         # Log the metrics
         mode = "eval" if self.control.should_evaluate else "train"
 
@@ -953,6 +979,18 @@ class EPSATrainer(GRPOTrainer):
             self._metrics[mode][f"rewards/{reward_func_name}"].append(mean_rewards)
         self._metrics[mode]["reward"].append(final_rewards_all_devices.mean().item())
         # self._metrics[mode]["reward_std"].append(std_grouped_rewards.mean().item())
+
+        # Log per-step reward ratios (rewards_per_step / final_rewards) across all devices
+        for step_idx in range(step_reward_ratios_all_devices.shape[1]):
+            self._metrics["eval"][f"ablation/step_rewards_ratio_{step_idx}"].append(
+                step_reward_ratios_all_devices[:, step_idx].mean().item()
+            )
+
+        # Log per-step eval time steps across all devices
+        for step_idx in range(eval_time_steps_all_devices.shape[1]):
+            self._metrics["eval"][f"ablation/time_step_{step_idx}"].append(
+                eval_time_steps_all_devices[:, step_idx].float().mean().item()
+            )
 
         if self.log_completions and self.state.global_step % self.args.logging_steps == 0:
             prompts_to_log = gather_object(prompts_text)

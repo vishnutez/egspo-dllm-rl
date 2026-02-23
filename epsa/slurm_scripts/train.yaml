@@ -34,7 +34,7 @@ logging_steps: 1
 learning_rate: 3e-5
 lr_scheduler_type: constant_with_warmup
 
-num_train_epochs: 50
+num_train_epochs: 500
 
 per_device_eval_batch_size: 1
 # num_generations_eval: 1

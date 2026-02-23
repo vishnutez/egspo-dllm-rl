@@ -435,10 +435,11 @@ def aggregate_results(directory=".", task='gsm8k', diffusion_steps=None, gen_len
 
 if __name__ == "__main__":
 
-    task = "<YOUR_TASK>"
-    algo = "<YOUR_ALGO_NAME>"
+    task = "sudoku"
+    algo = "ep"
     gen_lengths = [256, 512, 128]
-    checkpoints_dir = f"{task}/<YOUR_CHECKPOINT_DIR>"
+    run_name = "ep_lambda1_0.0_unbiased_high_entropy_sudoku_eps_0.5_eps_high_0.5_temp_0.9_ng8_bs6_ga2_le8_lr3e-5_kl_0.04_logps_aggregation_mean"
+    checkpoints_dir = f"checkpoints/{task}/{run_name}"
     checkpoint_ids = []
 
     if not checkpoint_ids:
@@ -448,11 +449,12 @@ if __name__ == "__main__":
 
     checkpoints = [os.path.join(checkpoints_dir, f"checkpoint-{checkpoint_id}") for checkpoint_id in checkpoint_ids]   
 
-    # Dictionary to store all metrics: {checkpoint_id: {gen_length: {accuracy, avg_effective_tokens}}}
-    all_metrics = {}
+    
 
     for gen_length in gen_lengths:
         diffusion_steps = gen_length // 2
+        # Dictionary to store all metrics: {checkpoint_id: {gen_length: {accuracy, avg_effective_tokens}}}
+        all_metrics = {}
         for checkpoint_id, checkpoint in zip(checkpoint_ids, checkpoints):
             print(f"Processing checkpoint {checkpoint_id}...")
             metrics = aggregate_results(directory=checkpoint, diffusion_steps=diffusion_steps, gen_length=gen_length, task=task)
@@ -473,9 +475,9 @@ if __name__ == "__main__":
         print(f"Best accuracy checkpoint for gen_length {gen_length} and diffusion_steps {diffusion_steps}: {best_accuracy_checkpoint_id}, accuracy: {best_accuracy}")
         
         # Save metrics to JSON file
-        output_file = f"{task}_{algo}_metrics_{gen_length}_{diffusion_steps}.json"
+        output_file = f"metrics/{task}_{algo}_metrics_{gen_length}_{diffusion_steps}.json"
         with open(output_file, "w") as f:
-            json.dump(all_metrics, f, indent=2)
+            json.dump({"run_name": run_name, "metrics": all_metrics}, f, indent=2)
         
         print(f"\nMetrics saved to {output_file}")
 
@@ -485,8 +487,8 @@ if __name__ == "__main__":
         print(f"Best accuracy checkpoint for gen_length {gen_length} and diffusion_steps {diffusion_steps}: {best_accuracy_checkpoint_id}, accuracy: {best_accuracy}")
         
         # Save metrics to JSON file
-        output_file_best_accuracy = f"{task}_{algo}_best_accuracy_{gen_length}_{diffusion_steps}_checkpoint-{best_accuracy_checkpoint_id}.json"
+        output_file_best_accuracy = f"metrics/{task}_{algo}_best_accuracy_{gen_length}_{diffusion_steps}_checkpoint-{best_accuracy_checkpoint_id}.json"
         with open(output_file_best_accuracy, "w") as f:
-            json.dump({"checkpoint_id": best_accuracy_checkpoint_id, "metrics": all_metrics[best_accuracy_checkpoint_id][gen_length]}, f, indent=2)
+            json.dump({"run_name": run_name, "checkpoint_id": best_accuracy_checkpoint_id, "metrics": all_metrics[best_accuracy_checkpoint_id][gen_length]}, f, indent=2)
         
         print(f"\nBest accuracy checkpoint {best_accuracy_checkpoint_id} metrics saved to {output_file_best_accuracy}")
