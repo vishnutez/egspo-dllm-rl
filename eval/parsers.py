@@ -152,6 +152,14 @@ class Parser:
             return final_answer
         return None
 
+    @classmethod
+    def extract_answer_code(cls, solution_str):
+        """Extract the coding solution from the generated text."""
+        matches = re.findall(r"```python\n(.*?)```", solution_str, re.DOTALL)
+        if len(matches):
+            return matches[0]
+        return None
+
 
 def is_equiv(str1, str2, verbose=False):
     if type(str1) == float or type(str2) == float:
@@ -388,3 +396,47 @@ def evaluate_equation(equation_str):
         return result
     except Exception as e:
         return float("Inf")
+
+
+def test_solution(code_str, output_dir=None):
+    def preexec():
+        # Limit memory to 1 GB (1,000,000,000 bytes)
+        resource.setrlimit(resource.RLIMIT_AS, (1_000_000_000, 1_000_000_000))
+
+    try:
+        result = subprocess.run(
+            [sys.executable, "-c", code_str],
+            preexec_fn=preexec,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,  # optional: protects against infinite loops
+            cwd=output_dir,  # Set working directory to output_dir
+        )
+        return 1 if result.returncode == 0 else 0
+    except Exception:
+        return 0
+
+
+def extract_human_eval_prompt(prompt):
+    in_docstring = False
+    docstring_lines = []
+    triple_quote = None
+
+    for line in prompt.splitlines():
+        stripped = line.strip()
+
+        # Detect opening triple quotes
+        if not in_docstring and (stripped.startswith('"""') or stripped.startswith("'''")):
+            triple_quote = stripped[:3]
+            if stripped.count(triple_quote) == 2 and len(stripped) > 6:
+                # Docstring starts and ends on same line
+                return stripped[3:-3].strip()
+            in_docstring = True
+            docstring_lines.append(stripped[3:])
+        elif in_docstring:
+            if stripped.endswith(triple_quote):
+                docstring_lines.append(stripped[:-3])
+                break
+            docstring_lines.append(stripped)
+
+    return "\n".join(docstring_lines).strip()

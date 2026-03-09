@@ -435,10 +435,10 @@ def aggregate_results(directory=".", task='gsm8k', diffusion_steps=None, gen_len
 
 if __name__ == "__main__":
 
-    task = "sudoku"
+    task = "gsm8k"
     algo = "ep"
     gen_lengths = [256, 512, 128]
-    run_name = "ep_lambda1_0.0_unbiased_high_entropy_sudoku_eps_0.5_eps_high_0.5_temp_0.9_ng8_bs6_ga2_le8_lr3e-5_kl_0.04_logps_aggregation_mean"
+    run_name = "ep_lambda1_0.0_unbiased_high_entropy_gsm8k_eps_0.5_eps_high_0.5_temp_0.9_ng8_bs6_ga8_le8_ns4_lr3e-5_kl_0.04_logps_aggregation_mean"
     checkpoints_dir = f"checkpoints/{task}/{run_name}"
     checkpoint_ids = []
 

@@ -214,11 +214,21 @@ def run_evaluation_for_checkpoint(
     # Use provided output_dir or fall back to args.output_dir
     if output_dir is None:
         output_dir = args.output_dir
-    
+
     os.makedirs(output_dir, exist_ok=True)
     filename = f"{output_dir}/{args.dataset}_{model_name}_{args.gen_length}_{args.diffusion_steps}_{dist.get_rank()}_generations.json"
     if dist.get_rank() == 0:
         print(f"Saving generations to {filename}")
+
+    if args.skip_existing:
+        # Check on rank 0 and broadcast the decision to all ranks
+        file_exists = torch.tensor(int(os.path.exists(filename)), device=local_rank)
+        if dist.get_world_size() > 1:
+            dist.broadcast(file_exists, src=0)
+        if file_exists.item():
+            if dist.get_rank() == 0:
+                print(f"Skipping (output already exists): {filename}")
+            return
 
     metrics = evaluate(
         model,
@@ -281,6 +291,7 @@ if __name__ == "__main__":
     parser.add_argument("--dont_use_box", action="store_true")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--num_checkpoints", type=int, default=100)
+    parser.add_argument("--skip_existing", action="store_true", help="Skip checkpoints whose output file already exists")
     args = parser.parse_args()
 
 

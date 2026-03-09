@@ -16,6 +16,111 @@ def count_effective_tokens(text):
     return len(tokens)
 
 
+def parse_humaneval_answers(json_path=None, json_data=None):
+    if json_path:
+        with open(json_path, "r") as f:
+            data = json.load(f)
+    else:
+        data = json_data
+
+    total_correct = 0
+    total_processed = 0
+    total_effective_tokens = 0
+    processed_items = []
+
+    for item in data.get("generations", []):
+        total_processed += 1
+        prompt = item.get("question", "")
+        unit_tests = item.get("ground_truth", "")
+        raw = item.get("generations", "")
+
+        # count tokens
+        eff = count_effective_tokens(raw)
+        total_effective_tokens += eff
+
+        # extract the user’s code from the model output
+        prog = Parser.extract_answer_code(raw)
+        is_correct = False
+
+        if prog:
+            # find function name
+            m = re.search(r"def\s+(\w+)\s*\(", prog)
+            if m:
+                fn = m.group(1)
+                # compose full test script
+                test_script = prog + "\n\n" + unit_tests + "\n\n" + f"check({fn})"
+                try:
+                    passed = test_solution(test_script)
+                except Exception:
+                    passed = False
+                if passed:
+                    total_correct += 1
+                    is_correct = True
+
+        processed_items.append(
+            {
+                "question": prompt,
+                "raw_generation": raw,
+                "extracted_answer": prog,
+                "ground_truth": unit_tests,
+                "is_correct": is_correct,
+                "effective_tokens": eff,
+            }
+        )
+
+    return total_correct, total_processed, processed_items, total_effective_tokens
+
+
+def parse_mbpp_answers(json_path=None, json_data=None):
+    if json_path:
+        with open(json_path, "r") as f:
+            data = json.load(f)
+    else:
+        data = json_data
+
+    total_correct = 0
+    total_processed = 0
+    total_effective_tokens = 0
+    processed_items = []
+
+    for item in data.get("generations", []):
+        total_processed += 1
+        prompt = item.get("question", "")
+        unit_tests = item.get("ground_truth", "")
+        raw = item.get("generations", "")
+
+        # count tokens
+        eff = count_effective_tokens(raw)
+        total_effective_tokens += eff
+
+        # extract the user’s code from the model output
+        prog = Parser.extract_answer_code(raw)
+        is_correct = False
+
+        if prog:
+            test_script = prog + "\n\n" + unit_tests
+            try:
+                passed = test_solution(test_script)
+            except Exception:
+                passed = False
+            if passed:
+                total_correct += 1
+                is_correct = True
+
+        processed_items.append(
+            {
+                "question": prompt,
+                "raw_generation": raw,
+                "extracted_answer": prog,
+                "ground_truth": unit_tests,
+                "is_correct": is_correct,
+                "effective_tokens": eff,
+            }
+        )
+
+    return total_correct, total_processed, processed_items, total_effective_tokens
+
+
 def parse_gsm_answers(json_path=None, json_data=None):
     if json_path:
         with open(json_path, "r") as file:
@@ -371,6 +476,14 @@ def aggregate_results(directory=".", save_detailed=True):
                 )
             elif "sudoku" in setup_name:
                 correct, processed, detailed_results, total_effective_tokens = parse_sudoku_answers(
+                    json_path=json_file
+                )
+            elif "humaneval" in setup_name:
+                correct, processed, detailed_results, total_effective_tokens = parse_humaneval_answers(
+                    json_path=json_file
+                )
+            elif "mbpp" in setup_name:
+                correct, processed, detailed_results, total_effective_tokens = parse_mbpp_answers(
                     json_path=json_file
                 )
 
