@@ -60,7 +60,7 @@ if (( $(echo "$LAMBDA1 > 0.0" | bc -l) )); then
     else
         NORMALIZE_RETURNS_FLAG=""
     fi
-    ALGO_NAME="epsa_lambda1_${LAMBDA1}${NORMALIZE_RETURNS_FLAG}"
+    ALGO_NAME="egspo_lambda1_${LAMBDA1}${NORMALIZE_RETURNS_FLAG}"
 elif [ "$LOGPS_EVAL_TIME_STEPS_MODE" = "high_entropy" ]; then
     ALGO_NAME="ep_lambda1_0.0"
 else
@@ -74,7 +74,7 @@ RUN_NAME="${ALGO_NAME}_${LOGPS_EVAL_MODE}_${LOGPS_EVAL_TIME_STEPS_MODE}_${DATASE
 # Some options are expected to be defined in
 # slurm_scripts/train.yaml instead of here.
 # ============================================
-TRAIN_SCRIPT="epsa_train.py"
+TRAIN_SCRIPT="egspo_train.py"
 TRAIN_ARGS_BASE="--config slurm_scripts/train.yaml"
 TRAIN_ARGS_EXTRA="--model_path ${MODEL_PATH} \
                   --dataset ${DATASET} \
