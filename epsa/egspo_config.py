@@ -19,7 +19,7 @@ from transformers import TrainingArguments
 
 
 @dataclass
-class EPSAConfig(TrainingArguments):
+class EGSPOConfig(TrainingArguments):
     r"""
     Configuration class for the [`GRPOTrainer`].
 
