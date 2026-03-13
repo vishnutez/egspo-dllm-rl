@@ -130,3 +130,22 @@ def get_math_questions(split="train") -> Dataset:
         }
     )  # type: ignore
     return data  # type: ignore
+
+
+def get_code_questions(split="train"):
+    data = load_dataset("KodCode/KodCode-Light-RL-10K", split=split)
+    data = data.train_test_split(test_size=0.1, seed=42)[
+        "train"
+    ]  # NOTE: 10% of the data was used for a different experiment
+    data = data.map(
+        lambda x: {
+            "prompt": [
+                {
+                    "role": "user",
+                    "content": f"{SYSTEM_PROMPT}\n\nYou are a coding expert. You will be given a coding problem to solve. Solve it step by step. \n\n{x['question']}",
+                }
+            ],
+            "answer": {"solution": x["solution"], "tests": x["test"]},
+        }
+    )
+    return data

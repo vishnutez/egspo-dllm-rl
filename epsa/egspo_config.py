@@ -433,3 +433,11 @@ class EGSPOConfig(TrainingArguments):
         default=False,
         metadata={"help": "Whether to use standard GRPO returns. If False, we use stepwise advantages to compute the returns."},
     )
+    dynamic_lambda1: bool = field(
+        default=False,
+        metadata={"help": "Whether to dynamically update lambda1 every lambda1_update_steps steps."},
+    )
+    lambda1_update_steps: int = field(
+        default=1000,
+        metadata={"help": "Number of steps to update lambda1."},
+    )

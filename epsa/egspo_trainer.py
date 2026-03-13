@@ -23,6 +23,7 @@ from trl.trainer.utils import (
 )
 import wandb
 from collections import defaultdict
+import os
 
 if is_peft_available():
     from peft import PeftConfig, get_peft_model
@@ -844,6 +845,8 @@ class EGSPOTrainer(GRPOTrainer):
                 # Repeat all input columns (but "prompt" and "completion") to match the number of generations
                 keys = [key for key in inputs[0] if key not in ["prompt", "completion"]]
                 reward_kwargs = {key: [example[key] for example in inputs for _ in range(self.args.logps_eval_num_steps+1)] for key in keys}
+                if reward_func_name == "coding_reward_func":
+                    reward_kwargs["cwd_path"] = os.path.join(self.args.output_dir, "execution_files")
                 output_reward_func = reward_func(
                     prompts=prompts_full,
                     completions=completions,
@@ -902,6 +905,12 @@ class EGSPOTrainer(GRPOTrainer):
 
         stepwise_advantages = (final_rewards.unsqueeze(1) - rewards_per_step[:, :-1])  # (batch_size, logps_eval_num_steps)
 
+
+
+        if self.args.dynamic_lambda1:
+            if self.state.global_step % self.args.lambda1_update_steps == 0:
+                self.args.lambda1 = self.args.lambda1 / 2       
+                print(f'updating lambda1 to {self.args.lambda1}', flush=True)
 
         if self.args.standard_grpo_returns:
             returns_local_selected = final_rewards.unsqueeze(1)

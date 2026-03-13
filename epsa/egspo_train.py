@@ -21,6 +21,7 @@ from reward_func import (
     sudoku_reward_func,
     boxed_and_answer_tags_format_reward,
     reward_len,
+    coding_reward_func,
 )
 from data_utils import (
     get_gsm8k_questions,
@@ -28,6 +29,7 @@ from data_utils import (
     get_sudoku_questions,
     set_random_seed,
     get_math_questions,
+    get_code_questions,
 )
 
 
@@ -87,6 +89,10 @@ def main(grpo_config, model_config):
             correctness_reward_func_math,
         ]
         test_set = get_math_questions("test")
+
+    elif grpo_config.dataset == "code":
+        dataset = get_code_questions()
+        reward_functions = [xmlcount_reward_func, coding_reward_func]
 
     # Shuffle dataset with fixed seed for reproducibility
     dataset = dataset.shuffle(seed=grpo_config.seed)

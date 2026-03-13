@@ -276,3 +276,178 @@ def boxed_and_answer_tags_format_reward(
     boxed_in_answer_rewards = boxed_in_answer(prompts, completions, answer, step=step)
     rewards = [b * 0.5 for b in boxed_in_answer_rewards]
     return rewards
+
+
+def run_test(test_func_name, code_str, result_dict, cwd_path, rank):
+    cwd_path = cwd_path + "/" + str(rank)
+    os.makedirs(cwd_path, exist_ok=True)
+
+    def target():
+        try:
+            # Set memory limit to 1 GB (in bytes)
+            soft, hard = 1_000_000_000, 1_000_000_000
+            resource.setrlimit(resource.RLIMIT_AS, (soft, hard))
+
+            # Change working directory
+            os.chdir(cwd_path)
+
+            # Create a new namespace and execute code
+            local_ns = {}
+            exec(code_str, local_ns)
+            local_ns[test_func_name]()
+            result_dict[test_func_name] = True
+        except Exception:
+            result_dict[test_func_name] = False
+
+    proc = multiprocessing.Process(target=target)
+    proc.start()
+    proc.join(timeout=1.0)
+
+    if proc.is_alive():
+        proc.terminate()
+        result_dict[test_func_name] = False
+
+
+def split_test_function(test_code: str, base_name: str = "test_case"):
+    lines = test_code.strip().splitlines()
+    result = []
+    counter = 1
+
+    for line in lines:
+        line = line.strip()
+        if line.startswith("assert"):
+            fn = f"def {base_name}_{counter}():\n    {line}"
+            result.append(fn)
+            counter += 1
+
+    return "\n\n".join(result)
+
+
+BLOCKED_MODULES = [
+    " os",
+    " sys",
+    " subprocess",
+    " shutil",
+    " socket",
+    " psutil",
+    " ctypes",
+    " pathlib",
+    " builtins",
+    "__import__",
+]
+
+
+def is_safe_code(code_str):
+    """Reject code that contains any blocked modules or keywords."""
+    for blocked in BLOCKED_MODULES:
+        if blocked in code_str:
+            return False
+    return True
+
+
+def time_based_random_string(length=10):
+    seed = int(time.time() * 1e6)
+    random.seed(seed)
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+def coding_reward_func(prompts, completions, answer, step=None, run_name=None, **kwargs) -> list[float]:
+    execution_cwd = kwargs.get("cwd_path")
+    if not os.path.exists(execution_cwd):
+        os.makedirs(execution_cwd, exist_ok=True)
+    programs = []
+    for group in completions:
+        for message in group:
+            content = message["content"]
+
+            # Look for the first python code block
+            code_match = re.search(r"```python\n(.*?)```", content, re.DOTALL)
+            code = code_match.group(1) if code_match else ""
+
+            # Check if the code is within <answer>...</answer>
+            answer_match = re.search(r"<answer>(.*?)</answer>", content, re.DOTALL)
+            is_in_answer = False
+            if answer_match and code:
+                answer_content = answer_match.group(1)
+                is_in_answer = f"```python\n{code}```" in answer_content
+
+            programs.append((code, is_in_answer))
+
+    unit_tests = [entry["tests"] for entry in answer]
+    rewards = []
+    for i, (solution, tests) in enumerate(zip(programs, unit_tests)):
+        solution, is_in_answer = solution
+        is_in_answer_reward = 0.5 if is_in_answer else 0
+        # Step 1: Extract imported function name
+        import_match = re.search(r"from solution import (\w+)", tests)
+        if not import_match:
+            assert_match = re.search(r"assert\s+(\w+)\s*\(", tests)
+            if assert_match:
+                imported_func = assert_match.group(1)
+            else:
+                print("No import or assert-based function name found in test code.")
+                print("=" * 10, "tests", "=" * 10)
+                print(tests)
+                print("=" * 30)
+                rewards.append(0)
+                continue
+        else:
+            imported_func = import_match.group(1)
+
+        # Step 2: Extract defined function name from solution
+        solution_match = re.search(r"def (\w+)\(", solution)
+        if not solution_match:
+            print("No function definition in generation")
+            print("=" * 10, "model output", "=" * 10)
+            print(solution)
+            print("=" * 10)
+            rewards.append(0 + is_in_answer_reward)
+            continue
+        defined_func = solution_match.group(1)
+
+        # Step 3: Rename if function names differ
+        if defined_func != imported_func:
+            solution = re.sub(rf"\bdef {defined_func}\b", f"def {imported_func}", solution)
+
+        # Step 3.5: Check iff code is safe to run
+        if not is_safe_code(solution):
+            rewards.append(0 + is_in_answer_reward)
+            print(f"Potentially Unsafe Generation:\n{solution}")
+            continue
+        # Step 4: Extract test function names
+        test_funcs = re.findall(r"def (\w+)\(\):", tests)
+
+        if len(test_funcs) <= 1:
+            tests = split_test_function(tests)
+            print(f"Fixed Test functions\n{tests}")
+            test_funcs = re.findall(r"def (\w+)\(\):", tests)
+
+        # Step 5: Replace import with the solution code
+        if import_match:
+            test_code = re.sub(r"from solution import \w+", lambda _: solution, tests)
+        elif assert_match:
+            test_code = solution + tests
+
+        # Step 6: Build complete executable test code
+        # Dict to hold test results
+        manager = multiprocessing.Manager()
+        result_dict = manager.dict()
+
+        # Run all test functions in parallel
+        jobs = []
+        for rank, fn in enumerate(test_funcs):
+            p = multiprocessing.Process(
+                target=run_test, args=(fn, test_code, result_dict, execution_cwd, rank)
+            )
+            p.start()
+            jobs.append(p)
+
+        for p in jobs:
+            p.join()
+
+        # Compute reward
+        passed = sum(result_dict.get(fn, False) for fn in test_funcs)
+        total = len(test_funcs)
+        reward = passed / total if total > 0 else 0.0
+        rewards.append(reward + is_in_answer_reward)
+    return rewards
