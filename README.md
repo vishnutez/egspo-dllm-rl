@@ -1,4 +1,4 @@
-## Paper Overview
+## Reinforcement Learning for Diffusion LLMs with Entropy-Guided Step Selection and Stepwise Advantages
 
 **Entropy-Guided Stepwise Policy Optimization with Stepwise Advantages (EGSPO-SA)** introduces a reinforcement learning framework for **diffusion language models (dLLMs)**. Unlike autoregressive LLMs, diffusion models generate sequences through an iterative denoising process, making standard sequence level RL fine-tuning challenging.
 
