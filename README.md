@@ -45,7 +45,7 @@ We provide an multi-node **`sbatch` script** for running experiments on a cluste
 Run training with:
 
 ```bash
-sbatch epsa/train.sh
+sbatch egspo/train.sh
 ```
 
 Unless otherwise specified in the paper, the **default parameters in `epsa/train.sh` correspond to the configurations used in our experiments**.
