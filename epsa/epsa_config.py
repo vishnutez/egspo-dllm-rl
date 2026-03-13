@@ -426,7 +426,7 @@ class EPSAConfig(TrainingArguments):
         metadata={"help": "Whether to use correctness reward only for the intermediate steps or use all reward functions for all steps."},
     )
     logps_aggregation_mode: str = field(
-        default="mean",
+        default="sum",
         metadata={"help": "Mode for aggregating logps per step. Must be one of 'sum' or 'mean'."},
     )
     standard_grpo_returns: bool = field(
