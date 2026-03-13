@@ -34,3 +34,20 @@ conda activate egspo-env
 
 ---
 
+## 🏋️ Training
+
+Configure the required environment variables (e.g., `WANDB_API_KEY`, `HF_HOME`, etc.) in:
+
+```bash
+epsa/train.sh
+```
+
+We provide an **`sbatch` script** for running experiments on a cluster. The script can also be easily adapted to a standard `.sh` file if needed.
+
+Run training with:
+
+```bash
+sbatch epsa/train.sh
+```
+
+Unless otherwise specified in the paper, the **default parameters in `epsa/train.sh` correspond to the configurations used in our experiments**.
