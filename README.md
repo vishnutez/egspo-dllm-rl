@@ -27,7 +27,7 @@ We formulate the denoising trajectory as a **finite-horizon Markov decision proc
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/vishnutez/epsa-dllm-rl.git
-cd epsa-dllm-rl
+git clone https://github.com/vishnutez/egspo-dllm-rl.git
+cd egspo-dllm-rl
 conda env create -f environment.yml
-conda activate epsa
+conda activate egspo-env
