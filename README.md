@@ -79,7 +79,7 @@ bash eval/eval_checkpoints.sh
 This step generates **model completions for the test prompts** using the selected checkpoints.  
 The script also **parses predicted answers from model outputs** and **extracts ground-truth answers from the dataset**, preparing them for evaluation.
 
----
+
 
 ### 📈 Step 2: Compute metrics
 
