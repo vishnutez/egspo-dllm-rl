@@ -8,8 +8,8 @@ from trl import TrlParser, ModelConfig
 from peft import LoraConfig
 
 # Custom imports
-from epsa_trainer import EPSATrainer
-from epsa_config import EPSAConfig
+from egspo_trainer import EGSPOTrainer
+from egspo_config import EGSPOConfig
 from reward_func import (
     xmlcount_reward_func,
     soft_format_reward_func,
@@ -135,7 +135,7 @@ def main(grpo_config, model_config):
         lora_dropout=model_config.lora_dropout,
     )
     # Initialize and run trainer
-    trainer = EPSATrainer(
+    trainer = EGSPOTrainer(
         args=grpo_config,
         model=model,
         peft_config=peft_config,
@@ -147,6 +147,6 @@ def main(grpo_config, model_config):
 
 
 if __name__ == "__main__":
-    parser = TrlParser((EPSAConfig, ModelConfig))
+    parser = TrlParser((EGSPOConfig, ModelConfig))
     grpo_config, model_config = parser.parse_args_and_config()
     main(grpo_config=grpo_config, model_config=model_config)
