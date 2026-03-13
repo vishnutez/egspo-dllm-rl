@@ -105,3 +105,12 @@ Our implementation builds upon the codebase from the **d1 paper**: https://githu
 We thank the authors for making their implementation publicly available, which helped facilitate this work.
 
 ---
+
+## 📬 Contact
+
+If you have any questions or concerns, feel free to contact us:
+
+- fatemehdoudi@tamu.edu  
+- vishnukunde@tamu.edu  
+
+You can also open an issue in this repository.
