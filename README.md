@@ -95,3 +95,15 @@ eval/get_and_save_metrics.py
 
 Using the completions generated in the previous step, this script **computes evaluation metrics by comparing predicted answers with ground-truth answers**.  
 The results are then **saved as `.json` files** for each evaluated checkpoint.
+
+---
+
+## 🙏 Acknowledgement
+
+Our implementation builds upon the codebase from the **D1 project**:
+
+https://github.com/dllm-reasoning/d1/tree/main/diffu-grpo
+
+We thank the authors for making their implementation publicly available, which helped facilitate this work.
+
+---
