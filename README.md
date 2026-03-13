@@ -1,9 +1,23 @@
 ## Paper Overview
 
-**Reinforcement Learning for Diffusion LLMs with Entropy-Guided Step Selection and Stepwise Advantages** studies how to apply reinforcement learning to **diffusion language models (dLLMs)**. Unlike autoregressive LLMs, diffusion models generate sequences through an iterative denoising process, which makes standard RL fine-tuning techniques difficult to apply.
+**Entropy-Guided Stepwise Policy Optimization with Stepwise Advantages (EGSPO-SA)** introduces a reinforcement learning framework for **diffusion language models (dLLMs)**. Unlike autoregressive LLMs, diffusion models generate sequences through an iterative denoising process, making standard RL fine-tuning challenging.
 
-This work formulates the denoising trajectory as a **finite-horizon Markov decision process** and derives a policy-gradient objective that decomposes across denoising steps. Building on this formulation, we introduce **Entropy-Guided Stepwise Policy Optimization (EGSPO)**, which focuses training on the most informative denoising steps based on policy entropy.
+We formulate the denoising trajectory as a **finite-horizon Markov decision process** and derive a policy-gradient objective that decomposes across denoising steps. Our method focuses learning on the most informative steps and introduces a lightweight **stepwise advantage estimator** for efficient training.
 
-We further propose **EGSPO-SA**, a practical variant that estimates **stepwise advantages** using lightweight one-step denoising completions, enabling efficient RL fine-tuning without requiring a separate value network or expensive multi-step rollouts.
+---
 
-Experiments on reasoning and coding benchmarks demonstrate improved training efficiency and competitive performance for RL-aligned diffusion LLMs.
+## Key Contributions
+
+- **Diffusion-MDP formulation** for RL fine-tuning of diffusion language models  
+- **Entropy-guided step selection** to identify the most informative denoising steps  
+- **EGSPO-SA**, a lightweight stepwise advantage estimator that avoids separate value models  
+- Strong empirical results on **coding**, **logical reasoning**, and **mathematical reasoning** benchmarks  
+
+---
+
+## Overview
+
+<p align="center">
+  <img src="assets/method_overview.png" width="48%">
+  <img src="assets/results_barplot.png" width="48%">
+</p>
