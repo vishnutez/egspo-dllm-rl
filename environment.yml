@@ -1,4 +1,4 @@
-name: epsa-dllm-rl
+name: egspo-env
 channels:
   - defaults
 dependencies:
