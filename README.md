@@ -53,13 +53,22 @@ Unless otherwise specified in the paper, the **default parameters in `epsa/train
 ---
 ## 📊 Evaluation
 
-### Generate completions
+### ⚡ Step 1: Generate completions
 
-Update the checkpoint directory in:
+Before running evaluation, update the required fields in:
 
 ```bash
 eval/eval_checkpoints.sh
 ```
+
+In particular, set the following variables:
+
+- `CHECKPOINT_DIR` — directory containing the trained model checkpoints to evaluate  
+- `OUTPUT_DIR` — directory where generated completions will be saved  
+- `TASKS` — evaluation task(s) (e.g., `gsm8k`, `sudoku`, etc.)  
+- `GEN_LENGTHS` — generation lengths to evaluate  
+- `<YOUR_CONDA_ENV_NAME>` — your conda environment name  
+- `<YOUR_HF_HOME_DIR>` *(optional)* — Hugging Face cache directory (remove if using the default)
 
 Then run:
 
@@ -67,7 +76,12 @@ Then run:
 bash eval/eval_checkpoints.sh
 ```
 
-### Compute metrics
+This step generates **model completions for the test prompts** using the selected checkpoints.  
+The script also **parses predicted answers from model outputs** and **extracts ground-truth answers from the dataset**, preparing them for evaluation.
+
+---
+
+### 📈 Step 2: Compute metrics
 
 Modify the following fields in:
 
@@ -79,4 +93,5 @@ eval/get_and_save_metrics.py
 - `checkpoint_dir`
 - `generated_lengths`
 
-Use the evaluated checkpoints from the previous step, then run the script to compute and save the metrics as `.json` files.
+Using the completions generated in the previous step, this script **computes evaluation metrics by comparing predicted answers with ground-truth answers**.  
+The results are then **saved as `.json` files** for each evaluated checkpoint.
