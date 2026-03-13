@@ -19,3 +19,15 @@ We formulate the denoising trajectory as a **finite-horizon Markov decision proc
   <img src="assets/overview.png" width="66%">
   <img src="assets/barplot.png" width="33%">
 </p>
+
+---
+
+## ⚙️ Step 1: Environment Setup
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/vishnutez/epsa-dllm-rl.git
+cd epsa-dllm-rl
+conda env create -f environment.yml
+conda activate epsa
