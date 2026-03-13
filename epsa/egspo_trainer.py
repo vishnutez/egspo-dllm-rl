@@ -31,7 +31,7 @@ if is_peft_available():
 RewardFunc = Union[str, PreTrainedModel, Callable[[list, list], list[float]]]
 
 
-class EPSATrainer(GRPOTrainer):
+class EGSPOTrainer(GRPOTrainer):
     """
     Group Relative Policy Optimization (GRPO) Trainer for Diffusion Language Models.
 
