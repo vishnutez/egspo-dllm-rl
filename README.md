@@ -49,3 +49,34 @@ sbatch epsa/train.sh
 ```
 
 Unless otherwise specified in the paper, the **default parameters in `epsa/train.sh` correspond to the configurations used in our experiments**.
+
+---
+## 📊 Evaluation
+
+### Generate completions
+
+Update the checkpoint directory in:
+
+```bash
+eval/eval_checkpoints.sh
+```
+
+Then run:
+
+```bash
+bash eval/eval_checkpoints.sh
+```
+
+### Compute metrics
+
+Modify the following fields in:
+
+```bash
+eval/get_and_save_metrics.py
+```
+
+- `task`
+- `checkpoint_dir`
+- `generated_lengths`
+
+Use the evaluated checkpoints from the previous step, then run the script to compute and save the metrics as `.json` files.
