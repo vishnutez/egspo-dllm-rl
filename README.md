@@ -114,3 +114,17 @@ If you have any questions or concerns, feel free to contact us:
 - vishnukunde@tamu.edu  
 
 You can also open an issue in this repository.
+
+---
+
+## 📜 Citation
+
+If you find our codebase or research useful, please consider citing our work:
+
+```bibtex
+@article{kunde2026reinforcement,
+  title={Reinforcement Learning for Diffusion LLMs with Entropy-Guided Step Selection and Stepwise Advantages},
+  author={Kunde, Vishnu Teja and Doudi, Fatemeh and Farahbakhsh, Mahdi and Kalathil, Dileep and Narayanan, Krishna and Chamberland, Jean-Francois},
+  year={2026}
+}
+```
