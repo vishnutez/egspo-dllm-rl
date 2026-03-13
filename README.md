@@ -13,7 +13,7 @@ We formulate the denoising trajectory as a **finite-horizon Markov decision proc
 - Strong empirical results on **coding**, **logical reasoning**, and **mathematical reasoning** benchmarks  
 
 
-## Overview
+## 🌈  Overview
 
 <p align="center">
   <img src="assets/overview.png" width="66%">
