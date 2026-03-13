@@ -100,9 +100,7 @@ The results are then **saved as `.json` files** for each evaluated checkpoint.
 
 ## 🙏 Acknowledgement
 
-Our implementation builds upon the codebase from the **D1 project**:
-
-https://github.com/dllm-reasoning/d1/tree/main/diffu-grpo
+Our implementation builds upon the codebase from the **d1 paper**: https://github.com/dllm-reasoning/d1/tree/main/diffu-grpo
 
 We thank the authors for making their implementation publicly available, which helped facilitate this work.
 
