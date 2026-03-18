@@ -122,13 +122,10 @@ You can also open an issue in this repository.
 If you find our codebase or research useful, please consider citing our work:
 
 ```bibtex
-@misc{kunde2026reinforcementlearningdiffusionllms,
-      title={Reinforcement Learning for Diffusion LLMs with Entropy-Guided Step Selection and Stepwise Advantages}, 
-      author={Vishnu Teja Kunde and Fatemeh Doudi and Mahdi Farahbakhsh and Dileep Kalathil and Krishna Narayanan and Jean-Francois Chamberland},
-      year={2026},
-      eprint={2603.12554},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2603.12554}, 
+@article{kunde2026Reinforcement,
+  title={Reinforcement Learning for Diffusion LLMs with Entropy-Guided Step Selection and Stepwise Advantages},
+  author={Kunde, Vishnu Teja and Doudi, Fatemeh and Farahbakhsh, Mahdi and Kalathil, Dileep and Narayanan, Krishna and Chamberland, Jean-Francois},
+  journal={arXiv preprint arXiv:2603.12554},
+  year={2026}
 }
 ```
