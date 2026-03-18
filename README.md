@@ -97,6 +97,13 @@ Using the completions generated in the previous step, this script **computes eva
 The results are then **saved as `.json` files** for each evaluated checkpoint.
 
 ---
+## 🤗 Checkpoints
+
+Task-specific checkpoints and usage instructions are available on HuggingFace:
+
+🔗 **[fatemehdoudi97/egspo-llada-8b](https://huggingface.co/fatemehdoudi97/egspo-llada-8b)**
+
+---
 
 ## 🙏 Acknowledgement
 
