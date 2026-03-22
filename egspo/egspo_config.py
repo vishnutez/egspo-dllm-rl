@@ -441,3 +441,7 @@ class EGSPOConfig(TrainingArguments):
         default=1000,
         metadata={"help": "Number of steps to update lambda1."},
     )
+    alpha_entropy: float = field(
+        default=0.7,
+        metadata={"help": "Fraction of total entropy to preserve when computing adaptive K in AdaEGSPOTrainer."},
+    )
