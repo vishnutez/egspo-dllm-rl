@@ -397,13 +397,13 @@ class EGSPOConfig(TrainingArguments):
         default="next",
         metadata={"help": "Prediction state from curr state: 'next' or 'final'."},
     )
-    logps_eval_mode: str = field(
+    logps_eval: str = field(
         default="unbiased",
         metadata={"help": "Mode for evaluating logps. Must be one of 'unbiased' or 'merge'."},
     )
-    logps_eval_time_steps_mode: str = field(
+    logps_eval_time_steps: str = field(
         default="high_entropy",
-        metadata={"help": "Mode for evaluating logps when logps_eval_mode is 'unbiased'. Must be one of 'high_entropy' or 'low_confidence'."},
+        metadata={"help": "Mode for evaluating logps when logps_eval is 'unbiased'. Must be one of 'high_entropy' or 'low_confidence'."},
     )
     terminate_at_last_non_eos: bool = field(
         default=False,
@@ -425,7 +425,7 @@ class EGSPOConfig(TrainingArguments):
         default=False,
         metadata={"help": "Whether to use correctness reward only for the intermediate steps or use all reward functions for all steps."},
     )
-    logps_aggregation_mode: str = field(
+    logps_aggregation: str = field(
         default="sum",
         metadata={"help": "Mode for aggregating logps per step. Must be one of 'sum' or 'mean'."},
     )

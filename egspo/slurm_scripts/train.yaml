@@ -72,6 +72,6 @@ beta: 0.04
 epsilon: 0.5
 generation_batch_size: 6  # <= per_device_train_batch_size but typically =
 logps_eval_num_steps: 8
-logps_eval_mode: unbiased
-logps_eval_time_steps_mode: high_entropy
+logps_eval: unbiased
+logps_eval_time_steps: high_entropy
 num_generations: 8
