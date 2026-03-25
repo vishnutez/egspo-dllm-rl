@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=ada_egspo_train
-#SBATCH --partition=long
+#SBATCH --job-name=long_ada_egspo_train
+#SBATCH --partition=long  
 #SBATCH --time=16:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -18,17 +18,16 @@ MODEL_PATH="GSAI-ML/LLaDA-8B-Instruct"
 
 NUM_GENERATIONS=8
 PER_DEVICE_TRAIN_BATCH_SIZE=6
-GRAD_ACCUMULATION_STEPS=2
-LOGPS_EVAL_NUM_STEPS=8
 LEARNING_RATE=3e-5
 LOGPS_EVAL_MODE="unbiased"
 LOGPS_EVAL_TIME_STEPS_MODE="high_entropy"
-EPSILON=0.2
+EPSILON=0.5
 EPSILON_HIGH=0.5
 TEMPERATURE=0.9
-LAMBDA1=0.5
+LAMBDA1=0.0
 NORMALIZE_RETURNS=true
-ALPHA_ENTROPY=0.7
+ALPHA_ENTROPY=0.3
+MAX_GRADIENT_STEPS=16
 
 # --------------------------------------------
 # Optional environment variables
@@ -36,10 +35,17 @@ ALPHA_ENTROPY=0.7
 #   export WANDB_PROJECT=...
 #   export HF_HOME=...
 # --------------------------------------------
+
 export WANDB_PROJECT="${WANDB_PROJECT:-huggingface}"
+export WANDB_RESUME="allow"
+export WANDB_ID="re2tvdq3"
+export WANDB_MODE="online"
+export WANDB_DIR="${WANDB_DIR:-/scratch/user/vishnukunde_tamu.edu/codebase/egspo-dllm-rl/egspo/wandb}"
+mkdir -p "${WANDB_DIR}"
 export HF_HOME="${HF_HOME:-/scratch/user/vishnukunde_tamu.edu/.cache/huggingface}"
 mkdir -p "${HF_HOME}"
 echo "HF_HOME=${HF_HOME}"
+echo "WANDB_DIR=${WANDB_DIR}"
 # export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda}"
 
 # ============================================
@@ -51,14 +57,14 @@ if (( $(echo "$LAMBDA1 > 0.0" | bc -l) )); then
     else
         NORMALIZE_RETURNS_FLAG=""
     fi
-    ALGO_NAME="ada_egspo_lambda1_${LAMBDA1}${NORMALIZE_RETURNS_FLAG}_alpha${ALPHA_ENTROPY}"
+    ALGO_NAME="ada_egspo_lambda1_${LAMBDA1}${NORMALIZE_RETURNS_FLAG}_alpha${ALPHA_ENTROPY}_max_${MAX_GRADIENT_STEPS}"
 elif [ "$LOGPS_EVAL_TIME_STEPS_MODE" = "high_entropy" ]; then
-    ALGO_NAME="ada_ep_lambda1_0.0_alpha${ALPHA_ENTROPY}"
+    ALGO_NAME="ada_ep_lambda1_0.0_alpha${ALPHA_ENTROPY}_max_${MAX_GRADIENT_STEPS}"
 else
-    ALGO_NAME="ada_vanilla_grpo_alpha${ALPHA_ENTROPY}"
+    ALGO_NAME="ada_vanilla_grpo_alpha${ALPHA_ENTROPY}_max_${MAX_GRADIENT_STEPS}"
 fi
 
-RUN_NAME="${ALGO_NAME}_${LOGPS_EVAL_MODE}_${LOGPS_EVAL_TIME_STEPS_MODE}_${DATASET}_eps_${EPSILON}_epshigh_${EPSILON_HIGH}_temp_${TEMPERATURE}_ng${NUM_GENERATIONS}_bs${PER_DEVICE_TRAIN_BATCH_SIZE}_ga${GRAD_ACCUMULATION_STEPS}_le${LOGPS_EVAL_NUM_STEPS}_lr${LEARNING_RATE}"
+RUN_NAME="${ALGO_NAME}_${LOGPS_EVAL_MODE}_${LOGPS_EVAL_TIME_STEPS_MODE}_${DATASET}_eps_${EPSILON}_epshigh_${EPSILON_HIGH}_temp_${TEMPERATURE}_ng${NUM_GENERATIONS}_bs${PER_DEVICE_TRAIN_BATCH_SIZE}_lr${LEARNING_RATE}"
 
 # ============================================
 # Environment setup
@@ -89,8 +95,6 @@ accelerate launch \
     --num_generations ${NUM_GENERATIONS} \
     --per_device_train_batch_size ${PER_DEVICE_TRAIN_BATCH_SIZE} \
     --generation_batch_size ${PER_DEVICE_TRAIN_BATCH_SIZE} \
-    --gradient_accumulation_steps ${GRAD_ACCUMULATION_STEPS} \
-    --logps_eval_num_steps ${LOGPS_EVAL_NUM_STEPS} \
     --logps_eval_mode ${LOGPS_EVAL_MODE} \
     --logps_eval_time_steps_mode ${LOGPS_EVAL_TIME_STEPS_MODE} \
     --learning_rate ${LEARNING_RATE} \

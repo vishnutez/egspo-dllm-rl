@@ -320,10 +320,18 @@ class AdaEGSPOTrainer(EGSPOTrainer):
 
         # ----------------------------------------------------------------
         # Compute adaptive K from entropy of this batch's distributions
+        # Synchronise across devices: use K_max so all ranks agree.
         # ----------------------------------------------------------------
-        K = self._compute_adaptive_K(unmasked_prob_distributions)
-        self._current_K = K
-        self._metrics["train"]["gradient_steps_per_batch"].append(K)
+        K_local = self._compute_adaptive_K(unmasked_prob_distributions)
+        K_tensor = torch.tensor(K_local, device=device)
+        K_all = self.accelerator.gather(K_tensor)
+        K = int(K_all.max().item())
+        print(f"[AdaEGSPO] K_local={K_local}  K_global_max={K}", flush=True)
+        self._current_K = min(K, self.args.max_gradient_steps)
+        self.args.gradient_accumulation_steps = self._current_K
+        self.accelerator.gradient_accumulation_steps = self._current_K
+        print(f"[AdaEGSPO] gradient_accumulation_steps set to K={self._current_K}", flush=True)
+        self._metrics["train"]["gradient_steps_per_batch"].append(self._current_K)
 
         # ----------------------------------------------------------------
         # Select eval_time_steps – top-K by entropy (per prompt)

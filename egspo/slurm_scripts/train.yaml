@@ -43,7 +43,7 @@ per_device_eval_batch_size: 1
 
 
 per_device_train_batch_size: 6
-gradient_accumulation_steps: 2
+gradient_accumulation_steps: 8
 
 
 gradient_checkpointing: false
@@ -56,9 +56,9 @@ run_name: your_run_name
 output_dir: /checkpoints/your_task_name/your_run_name  # <-- Replace with desired output directory
 
 # Parameters for saving checkpoints
-save_steps: 200
+save_steps: 50
 save_strategy: steps
-save_total_limit: 40
+save_total_limit: 200
 
 # Diffusion and GRPO-specific
 max_completion_length: 256

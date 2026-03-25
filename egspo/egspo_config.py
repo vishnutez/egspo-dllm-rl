@@ -426,7 +426,7 @@ class EGSPOConfig(TrainingArguments):
         metadata={"help": "Whether to use correctness reward only for the intermediate steps or use all reward functions for all steps."},
     )
     logps_aggregation_mode: str = field(
-        default="sum",
+        default="mean",
         metadata={"help": "Mode for aggregating logps per step. Must be one of 'sum' or 'mean'."},
     )
     standard_grpo_returns: bool = field(
@@ -444,4 +444,8 @@ class EGSPOConfig(TrainingArguments):
     alpha_entropy: float = field(
         default=0.7,
         metadata={"help": "Fraction of total entropy to preserve when computing adaptive K in AdaEGSPOTrainer."},
+    )
+    max_gradient_steps: int = field(
+        default=16,
+        metadata={"help": "Maximum number of gradient steps per batch. If the computed K is greater than this value, it will be set to this value."},
     )
