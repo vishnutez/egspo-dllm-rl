@@ -700,13 +700,19 @@ class EGSPOTrainer(GRPOTrainer):
                 self.args.lambda1 = self.args.lambda1 / 2
                 print(f'updating lambda1 to {self.args.lambda1}', flush=True)
 
+        # Stepwise lambda schedule: lambda_t = lambda1 * t / T
+        # eval_steps: (batch_size, logps_eval_num_steps), values in [0, T-1]
+        T = self.args.diffusion_steps
+        self.lambda_t = self.args.lambda1 * eval_steps.float() / T
+        # shape: (batch_size, logps_eval_num_steps), matches raw_step_advs
+
         if self.args.standard_grpo_returns:
             local_returns = final_rewards.unsqueeze(1)
         else:
-            local_returns = final_rewards.unsqueeze(1) + self.args.lambda1 * raw_step_advs
+            local_returns = final_rewards.unsqueeze(1) + self.lambda_t * raw_step_advs
             if self.args.normalize_returns:
-                print('normalizing returns by 1 + lambda1', flush=True)
-                local_returns = local_returns / (1 + self.args.lambda1)
+                print('normalizing returns by 1 + lambda_t', flush=True)
+                local_returns = local_returns / (1 + self.lambda_t)
             else:
                 print('not normalizing returns', flush=True)
 
@@ -731,10 +737,10 @@ class EGSPOTrainer(GRPOTrainer):
         step_advs = step_advs[proc_slice]
 
         if self.args.standard_grpo_returns:
-            step_advs = step_advs + self.args.lambda1 * raw_step_advs
+            step_advs = step_advs + self.lambda_t * raw_step_advs
             if self.args.normalize_returns:
-                print('normalizing advantages by (1 + lambda1)', flush=True)
-                step_advs = step_advs / (1 + self.args.lambda1)
+                print('normalizing advantages by (1 + lambda_t)', flush=True)
+                step_advs = step_advs / (1 + self.lambda_t)
             else:
                 print('not normalizing advantages', flush=True)
 

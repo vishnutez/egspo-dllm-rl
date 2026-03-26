@@ -441,3 +441,7 @@ class EGSPOConfig(TrainingArguments):
         default=1000,
         metadata={"help": "Number of steps to update lambda1."},
     )
+    stepwise_lambda1: bool = field(
+        default=False,
+        metadata={"help": "Whether to use stepwise lambda1 during diffusion generation."},
+    )

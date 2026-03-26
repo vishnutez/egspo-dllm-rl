@@ -77,3 +77,9 @@ logs_*/
 
 *.sbatch
 *.json
+
+# ---- Misc ----
+agent_instructions/
+*.txt
+sync_wandb.sh
+replay_wandb.py
