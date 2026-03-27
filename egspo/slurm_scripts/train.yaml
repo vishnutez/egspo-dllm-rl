@@ -56,9 +56,9 @@ run_name: your_run_name
 output_dir: /checkpoints/your_task_name/your_run_name  # <-- Replace with desired output directory
 
 # Parameters for saving checkpoints
-save_steps: 200
+save_steps: 50
 save_strategy: steps
-save_total_limit: 40
+save_total_limit: 200
 
 # Diffusion and GRPO-specific
 max_completion_length: 256
@@ -73,5 +73,5 @@ epsilon: 0.5
 generation_batch_size: 6  # <= per_device_train_batch_size but typically =
 logps_eval_num_steps: 8
 logps_eval: unbiased
-logps_eval_time_steps: high_entropy
+logps_eval_step_selection: high_entropy
 num_generations: 8

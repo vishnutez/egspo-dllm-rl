@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=sw_egsposa_train
+#SBATCH --job-name=egsposa_train
 #SBATCH --partition=long  
 #SBATCH --time=16:00:00
 #SBATCH --nodes=1
@@ -24,14 +24,14 @@ LOGPS_EVAL_STEP_SELECTION="high_entropy"
 EPSILON=0.5
 EPSILON_HIGH=0.5
 TEMPERATURE=0.9
-LAMBDA1=0.0
+LAMBDA1=0.1
 NORMALIZE_RETURNS=false
 GRAD_ACCUMULATION_STEPS=8
 LOGPS_EVAL_NUM_STEPS=8
 BETA=0.04
 LOGPS_AGGREGATION="mean"
 CORRECTNESS_STEP_REWARD_ONLY=true
-STEPWISE_LAMBDA1=true
+STEPWISE_LAMBDA1=false
 
 # --------------------------------------------
 # Optional environment variables
@@ -41,8 +41,8 @@ STEPWISE_LAMBDA1=true
 # --------------------------------------------
 
 export WANDB_PROJECT="${WANDB_PROJECT:-huggingface}"
-# export WANDB_RESUME="allow"
-# export WANDB_ID="re2tvdq3"
+export WANDB_RESUME="allow"
+export WANDB_ID="bo0dp1yq"
 export WANDB_MODE="online"
 export WANDB_DIR="${WANDB_DIR:-/scratch/user/vishnukunde_tamu.edu/codebase/egspo-dllm-rl/egspo/wandb}"
 mkdir -p "${WANDB_DIR}"

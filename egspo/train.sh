@@ -86,7 +86,7 @@ TRAIN_ARGS_EXTRA="--model_path ${MODEL_PATH} \
                   --gradient_accumulation_steps ${GRAD_ACCUMULATION_STEPS} \
                   --logps_eval_num_steps ${LOGPS_EVAL_NUM_STEPS} \
                   --logps_eval ${LOGPS_EVAL_MODE} \
-                  --logps_eval_time_steps ${LOGPS_EVAL_TIME_STEPS_MODE} \
+                  --logps_eval_step_selection ${LOGPS_EVAL_TIME_STEPS_MODE} \
                   --learning_rate ${LEARNING_RATE} \
                   --epsilon ${EPSILON} \
                   --epsilon_high ${EPSILON_HIGH} \

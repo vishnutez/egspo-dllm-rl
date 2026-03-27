@@ -551,7 +551,7 @@ class EGSPOTrainer(GRPOTrainer):
         device = unmask_probs.device
         bs = unmask_probs.shape[0]
         n_eval = self.args.logps_eval_num_steps
-        mode = self.args.logps_eval_time_steps
+        mode = self.args.logps_eval_step_selection
 
         if self.args.terminate_at_last_non_eos:
             print(f'last_non_eos_steps (batch_size,) = ({last_non_eos_steps})', flush=True)
@@ -569,7 +569,7 @@ class EGSPOTrainer(GRPOTrainer):
                             unmask_probs[b, :cap + 1].unsqueeze(0)
                         ).squeeze(0)
                     else:
-                        raise ValueError(f'Invalid logps_eval_time_steps: {mode}')
+                        raise ValueError(f'Invalid logps_eval_step_selection: {mode}')
                 print(f'eval_steps (batch_size, logps_eval_num_steps) = ({eval_steps})', flush=True)
         else:
             if self.args.logps_eval == 'unbiased':

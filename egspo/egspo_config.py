@@ -401,7 +401,7 @@ class EGSPOConfig(TrainingArguments):
         default="unbiased",
         metadata={"help": "Mode for evaluating logps. Must be one of 'unbiased' or 'merge'."},
     )
-    logps_eval_time_steps: str = field(
+    logps_eval_step_selection: str = field(
         default="high_entropy",
         metadata={"help": "Mode for evaluating logps when logps_eval is 'unbiased'. Must be one of 'high_entropy' or 'low_confidence'."},
     )
