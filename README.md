@@ -37,7 +37,7 @@ conda activate egspo-env
 
 ## 🏋️ Training
 
-Configure the required environment variables (e.g., `WANDB_API_KEY`, `HF_HOME`, etc.) in **epsa/train.sh**
+Configure the required environment variables (e.g., `WANDB_API_KEY`, `HF_HOME`, etc.) in **egspo/train.sh**
 
 
 We provide an multi-node **`sbatch` script** for running experiments on a cluster. The script can also be easily adapted to a standard `.sh` file if needed.
