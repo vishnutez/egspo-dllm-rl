@@ -17,7 +17,7 @@ We formulate the denoising trajectory as a **finite-horizon Markov decision proc
 
 <p align="center">
   <img src="assets/overview.png" width="66%">
-  <img src="assets/barplot.png" width="33%">
+  <img src="assets/updated_barplot.png" width="33%">
 </p>
 
 ---
