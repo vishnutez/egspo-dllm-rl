@@ -49,6 +49,8 @@ sbatch egspo/train.sh
 ```
 
 Unless otherwise specified in the paper, the **default parameters in `epsa/train.sh` correspond to the configurations used in our experiments**.
+For Dream-7B-Instruct, the train and trainer scripts are located in `egspo/DREAM/`.
+
 
 ---
 ## 📊 Evaluation
